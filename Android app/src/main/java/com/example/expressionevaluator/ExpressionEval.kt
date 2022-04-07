@@ -1,6 +1,7 @@
 package com.example.expressionevaluator
 
 import java.util.*
+import kotlin.math.PI
 import kotlin.math.pow
 
 class ExpressionEval(inputString: String) {
@@ -21,11 +22,11 @@ class ExpressionEval(inputString: String) {
         var lastToken = '?'
         do {
             token = expression[counter]
-            if (token == '(' && lastToken == '-') {  //Handles unary negation
+            if (token == '(' && lastToken == '-' && A.size == 0) {  //Handles unary negation
                 A.pop()
                 counter++
                 B.push(0 - subExpressionEval())
-            } else if (token == '(' && lastToken in '0'..'9') { //If its multiplication due to num being next to parenthesis
+            } else if (token == '(' && isPartOfNum(lastToken)) { //If its multiplication due to num being next to parenthesis
                 dealWithOp('*')
                 B.push(subExpressionEval())
             } else if (token == '(') {
@@ -44,6 +45,12 @@ class ExpressionEval(inputString: String) {
             //form the number as a double and push onto stack B
             else if ((token in '0'..'9') || token == '.') {
                 B.push(formNum())
+            } else if (token == 960.toChar()) {  //char 960 is PI
+                if (isPartOfNum(lastToken)) {
+                    A.push('*')
+                }
+                B.push(PI)
+                counter++
             } else {
                 throw Exception("Invalid character detected in string")
             }
@@ -55,6 +62,10 @@ class ExpressionEval(inputString: String) {
             eval()
         }
         return B.pop()
+    }
+
+    private fun isPartOfNum(token: Char): Boolean {
+        return token in '0'..'9' || token == 960.toChar() || token == '.'
     }
 
     private fun subExpressionEval(): Double {
@@ -128,8 +139,8 @@ class ExpressionEval(inputString: String) {
   performing the operation and pushing the result onto B as a double value.*/
 
     private fun dealWithOp(token: Char) {
-        if (A.size == 0 || precedence(token, A)) { //when you need to push (A is empty or precedence is lower)
-            A.push(token)
+        if (A.size == 0 || precedence(token, A)) {  //when you need to push
+            A.push(token)                           //(A is empty or precedence is lower)
             counter++
         } else {
             do {
@@ -150,7 +161,6 @@ class ExpressionEval(inputString: String) {
             '*' -> operand1 * operand2
             '/' -> operand1 / operand2
             else -> Math.pow(operand1, operand2)
-
         }
         B.push(value) //push result onto B
     }

@@ -1,3 +1,5 @@
+package com.example.expressionevaluator
+
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.pow
@@ -24,9 +26,13 @@ class ExpressionEval(inputString: String) {
                 A.pop()
                 counter++
                 B.push(0 - subExpressionEval())
-            } else if (token == '(' && isPartOfNum(lastToken)) { //If its multiplication due to num being next to parenthesis
+            } else if (token == '(' && isPartOfNum(lastToken)) { //If its multiplication due to num being before parenthesis
                 dealWithOp('*')
+                counter++
                 B.push(subExpressionEval())
+            } else if (isPartOfNum(token) && lastToken == '(') {   //If its multiplication due to num being after parenthesis
+                dealWithOp('*')
+                dealWithNum(token, lastToken)
             } else if (token == '(') {
                 counter++
                 B.push(subExpressionEval())
@@ -37,11 +43,16 @@ class ExpressionEval(inputString: String) {
                     counter++
                 } else {
                     dealWithOp(token)
+                    counter++
                 }
             }
             //if the token is the leftmost digit of a number or a decimal point on the left,
             //form the number as a double and push onto stack B
-            else if ((token in '0'..'9') || token == '.') {
+            else if (isPartOfNum(token)) {
+                dealWithNum(token, lastToken)
+            }
+            //cleanup
+            /*else if ((token in '0'..'9') || token == '.') {
                 B.push(formNum())
             } else if (token == 960.toChar()) {  //char 960 is PI
                 if (isPartOfNum(lastToken)) {
@@ -49,7 +60,7 @@ class ExpressionEval(inputString: String) {
                 }
                 B.push(PI)
                 counter++
-            } else {
+            }*/ else {
                 throw Exception("Invalid character detected in string")
             }
             lastToken = token
@@ -60,6 +71,18 @@ class ExpressionEval(inputString: String) {
             eval()
         }
         return B.pop()
+    }
+
+    private fun dealWithNum(token: Char, lastToken: Char) {
+        if (token == 960.toChar()) {  //char 960 is PI
+            if (isPartOfNum(lastToken)) {
+                A.push('*')
+            }
+            B.push(PI)
+            counter++
+        } else {
+            B.push(formNum())
+        }
     }
 
     private fun isPartOfNum(token: Char): Boolean {
@@ -92,22 +115,21 @@ class ExpressionEval(inputString: String) {
             c = expression[counter]
             //if the current character is a digit, convert to its
             //int value and include it in the value corresponding to the string.
-            if ((c >= '0') && (c <= '9')) {
+            if (c in '0'..'9') {
                 if (decimalFlag == 0) {
                     intPart = intPart * mult + (c - '0')
                 } else {
                     decimalPart = decimalPart * mult + (c - '0')
                     count++
                 }
-            } else {
-                if (c == '.') {
-                    decimalFlag = 1
-                }
+            } else if (c == '.') {
+                decimalFlag = 1
             }
+
             counter++ //Prepare to move to the next character to the right.
             d = '?' //reset d
             if (counter < expression.length) {
-                d = expression[counter] //the next character to the left
+                d = expression[counter] //the next character to the right
             }
         } while (counter <= expression.length && (d in '0'..'9' || d == '_' || d == '.'))//check for a valid character
         total = if (decimalFlag == 1) {
@@ -139,13 +161,11 @@ class ExpressionEval(inputString: String) {
     private fun dealWithOp(token: Char) {
         if (A.size == 0 || precedence(token, A)) {  //when you need to push
             A.push(token)                           //(A is empty or precedence is lower)
-            counter++
         } else {
             do {
                 eval()
             } while (!(A.size == 0 || precedence(token, A)))
             A.push(token)
-            counter++
         }
     }
 

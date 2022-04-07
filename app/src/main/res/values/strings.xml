@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Expression Evaluator</string>
+    <string name="input_expression">Input Expression</string>
+    <string name="input_a_valid_expression_containing_only_numbers_operators_or_parenthesis">Input a valid expression containing only numbers, operators (+, -, /, *, ^) and parenthesis.</string>
+    <string name="evaluate">Evaluate</string>
+    <string name="result">Result</string>
+    <string name="invalid_expression">Invalid Expression</string>
+</resources>

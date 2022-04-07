@@ -16,11 +16,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.evaluateButton.setOnClickListener{
             try {
-                val inputString = ExpressionEval(binding.expressionInput.text.toString()
-                ).evaluate().toString()
-                inputString.replace(215.toChar(),'*')
-                inputString.replace(257.toChar(),'/')
-                binding.expressionOutput.text = inputString
+                var inputString = binding.expressionInput.text.toString()
+                inputString = inputString.replace(215.toChar(),'*')
+                inputString = inputString.replace(247.toChar(),'/')
+                val outputString = ExpressionEval(inputString).evaluate().toString()
+                binding.expressionOutput.text = outputString
             }catch (e:Exception){
                 binding.expressionOutput.text = getString(R.string.invalid_expression)
             }
